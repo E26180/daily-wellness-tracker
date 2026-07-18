@@ -1,1 +1,4 @@
 {'date': '2026-07-18', 'mood': 'happy', 'water': '6', 'exercise': '30', 'sleep': '8'}
+{'date': '2026-07-18', 'mood': 'happy', 'water': '6', 'exercise': '30', 'sleep': '8'}
+{'date': '2026-07-19', 'mood': 'tired', 'water': '3', 'exercise': '10', 'sleep': '6'}
+{'date': '2026-07-15', 'mood': 'nice', 'water': 5, 'exercise': 45, 'sleep': 7}
