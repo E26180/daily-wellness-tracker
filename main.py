@@ -26,6 +26,22 @@ def add_entry():
     print("\nEntry saved successfully!")
 
 
+def view_entries():
+    try:
+        with open(DATA_FILE, "r") as file:
+            entries = file.readlines()
+
+            if len(entries) == 0:
+                print("\nNo entries found.")
+            else:
+                print("\nAll Wellness Entries:")
+                for entry in entries:
+                    print(entry.strip())
+
+    except FileNotFoundError:
+        print("\nNo data file found. Please add an entry first.")
+
+
 def show_menu():
     print("\nDaily Wellness Tracker")
     print("1. Add daily entry")
@@ -41,7 +57,7 @@ def main():
         if choice == "1":
             add_entry()
         elif choice == "2":
-            print("View all entries selected")
+            view_entries()
         elif choice == "3":
             print("Goodbye!")
             break
