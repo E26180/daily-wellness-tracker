@@ -42,11 +42,33 @@ def view_entries():
         print("\nNo data file found. Please add an entry first.")
 
 
+def search_entry_by_date():
+    search_date = input("Enter the date to search (YYYY-MM-DD): ")
+    found = False
+
+    try:
+        with open(DATA_FILE, "r") as file:
+            entries = file.readlines()
+
+            for entry in entries:
+                if search_date in entry:
+                    print("\nEntry found:")
+                    print(entry.strip())
+                    found = True
+
+            if not found:
+                print("\nNo entry found for that date.")
+
+    except FileNotFoundError:
+        print("\nNo data file found. Please add an entry first.")
+
+
 def show_menu():
     print("\nDaily Wellness Tracker")
     print("1. Add daily entry")
     print("2. View all entries")
-    print("3. Exit")
+    print("3. Search entry by date")
+    print("4. Exit")
 
 
 def main():
@@ -59,10 +81,12 @@ def main():
         elif choice == "2":
             view_entries()
         elif choice == "3":
+            search_entry_by_date()
+        elif choice == "4":
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please enter 1, 2, or 3.")
+            print("Invalid choice. Please enter 1, 2, 3, or 4.")
 
 
 main()
