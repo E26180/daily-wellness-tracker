@@ -1,6 +1,20 @@
 DATA_FILE = "wellness_data.txt"
 
 
+def get_number_input(message):
+    while True:
+        user_input = input(message)
+
+        try:
+            number = int(user_input)
+            if number < 0:
+                print("Please enter a positive number.")
+            else:
+                return number
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+
 def save_entry(entry):
     with open(DATA_FILE, "a") as file:
         file.write(str(entry) + "\n")
@@ -9,9 +23,10 @@ def save_entry(entry):
 def add_entry():
     date = input("Enter date (YYYY-MM-DD): ")
     mood = input("Enter your mood today: ")
-    water = input("How many glasses of water did you drink? ")
-    exercise = input("How many minutes did you exercise? ")
-    sleep = input("How many hours did you sleep? ")
+
+    water = get_number_input("How many glasses of water did you drink? ")
+    exercise = get_number_input("How many minutes did you exercise? ")
+    sleep = get_number_input("How many hours did you sleep? ")
 
     entry = {
         "date": date,
@@ -64,7 +79,7 @@ def search_entry_by_date():
 
 def get_water_amount(entry):
     try:
-        water_text = entry.split("'water': '")[1].split("'")[0]
+        water_text = entry.split("'water': ")[1].split(",")[0]
         return int(water_text)
     except:
         return 0
