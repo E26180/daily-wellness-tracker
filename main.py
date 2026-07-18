@@ -1,3 +1,11 @@
+DATA_FILE = "wellness_data.txt"
+
+
+def save_entry(entry):
+    with open(DATA_FILE, "a") as file:
+        file.write(str(entry) + "\n")
+
+
 def add_entry():
     date = input("Enter date (YYYY-MM-DD): ")
     mood = input("Enter your mood today: ")
@@ -13,8 +21,9 @@ def add_entry():
         "sleep": sleep
     }
 
-    print("\nEntry added:")
-    print(entry)
+    save_entry(entry)
+
+    print("\nEntry saved successfully!")
 
 
 def show_menu():
