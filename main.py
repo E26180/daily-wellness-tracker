@@ -22,7 +22,6 @@ def add_entry():
     }
 
     save_entry(entry)
-
     print("\nEntry saved successfully!")
 
 
@@ -63,12 +62,39 @@ def search_entry_by_date():
         print("\nNo data file found. Please add an entry first.")
 
 
+def get_water_amount(entry):
+    try:
+        water_text = entry.split("'water': '")[1].split("'")[0]
+        return int(water_text)
+    except:
+        return 0
+
+
+def sort_entries_by_water():
+    try:
+        with open(DATA_FILE, "r") as file:
+            entries = file.readlines()
+
+            if len(entries) == 0:
+                print("\nNo entries found.")
+            else:
+                sorted_entries = sorted(entries, key=get_water_amount)
+
+                print("\nEntries sorted by water intake:")
+                for entry in sorted_entries:
+                    print(entry.strip())
+
+    except FileNotFoundError:
+        print("\nNo data file found. Please add an entry first.")
+
+
 def show_menu():
     print("\nDaily Wellness Tracker")
     print("1. Add daily entry")
     print("2. View all entries")
     print("3. Search entry by date")
-    print("4. Exit")
+    print("4. Sort entries by water intake")
+    print("5. Exit")
 
 
 def main():
@@ -83,10 +109,12 @@ def main():
         elif choice == "3":
             search_entry_by_date()
         elif choice == "4":
+            sort_entries_by_water()
+        elif choice == "5":
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please enter 1, 2, 3, or 4.")
+            print("Invalid choice. Please enter 1, 2, 3, 4, or 5.")
 
 
 main()
