@@ -2,11 +2,11 @@
 
 ## Student Information
 
-Name: Ahmet Baykoz  
-Student Number: 303068470
-P-number: P509320
-Course Code: IY499  
-Module: Introduction to Programming  
+- **Name:** Ahmet Baykoz
+- **Student Number:** 303068470
+- **P Number:** P509320
+- **Course Code:** IY499
+- **Module:** Introduction to Programming
 
 ## Project Description
 
