@@ -1,24 +1,42 @@
-from datetime import datetime
+"""Daily Wellness Tracker for the IY499 programming assignment."""
+
 import csv
 import os
+from datetime import datetime
 
-DATA_FILE = "wellness_data.csv"
+
+PROJECT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(PROJECT_FOLDER, "wellness_data.csv")
+FIELDNAMES = ["date", "mood", "water", "exercise", "sleep"]
 
 
 def pause():
+    """Wait until the user is ready to return to the menu."""
     input("\nPress Enter to return to the menu...")
 
 
 def create_file_if_not_exists():
-    if not os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "w", newline="") as file:
+    """Create the CSV data file and its headings when it does not exist."""
+    if os.path.exists(DATA_FILE):
+        return True
+
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["date", "mood", "water", "exercise", "sleep"])
+            writer.writerow(FIELDNAMES)
+        return True
+    except PermissionError:
+        print("Error: Permission was denied while creating the data file.")
+    except OSError as error:
+        print(f"Error: The data file could not be created ({error}).")
+
+    return False
 
 
-def get_valid_date():
+def get_valid_date(message="Enter date (YYYY-MM-DD): "):
+    """Ask for a real date in YYYY-MM-DD format."""
     while True:
-        date_text = input("Enter date (YYYY-MM-DD): ")
+        date_text = input(message).strip()
 
         try:
             datetime.strptime(date_text, "%Y-%m-%d")
@@ -27,19 +45,23 @@ def get_valid_date():
             print("Invalid date. Please enter a real date in YYYY-MM-DD format.")
 
 
-def get_non_empty_text(message):
+def get_non_empty_text(message, maximum_length=40):
+    """Ask for text that is not empty or unnecessarily long."""
     while True:
         text = input(message).strip()
 
         if text == "":
             print("This field cannot be empty.")
+        elif len(text) > maximum_length:
+            print(f"Please enter no more than {maximum_length} characters.")
         else:
             return text
 
 
 def get_number_input(message, minimum, maximum):
+    """Ask for a whole number inside an accepted range."""
     while True:
-        user_input = input(message)
+        user_input = input(message).strip()
 
         try:
             number = int(user_input)
@@ -48,72 +70,160 @@ def get_number_input(message, minimum, maximum):
                 print(f"Please enter a number between {minimum} and {maximum}.")
             else:
                 return number
-
         except ValueError:
-            print("Invalid input. Please enter a number.")
+            print("Invalid input. Please enter a whole number.")
 
 
-def save_entry(entry):
-    create_file_if_not_exists()
+def row_to_entry(row):
+    """Convert one CSV row into a validated wellness dictionary."""
+    date_text = (row.get("date") or "").strip()
+    mood = (row.get("mood") or "").strip()
+    water = int(row["water"])
+    exercise = int(row["exercise"])
+    sleep = int(row["sleep"])
 
-    with open(DATA_FILE, "a", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow([
-            entry["date"],
-            entry["mood"],
-            entry["water"],
-            entry["exercise"],
-            entry["sleep"]
-        ])
+    datetime.strptime(date_text, "%Y-%m-%d")
+
+    if mood == "":
+        raise ValueError("mood is empty")
+    if len(mood) > 40:
+        raise ValueError("mood is longer than 40 characters")
+    if water < 0 or water > 30:
+        raise ValueError("water must be between 0 and 30")
+    if exercise < 0 or exercise > 300:
+        raise ValueError("exercise must be between 0 and 300")
+    if sleep < 0 or sleep > 24:
+        raise ValueError("sleep must be between 0 and 24")
+
+    return {
+        "date": date_text,
+        "mood": mood,
+        "water": water,
+        "exercise": exercise,
+        "sleep": sleep,
+    }
 
 
 def load_entries():
-    create_file_if_not_exists()
+    """Load valid CSV entries and skip damaged rows safely."""
+    if not create_file_if_not_exists():
+        return None
 
     entries = []
+    skipped_rows = 0
 
-    with open(DATA_FILE, "r") as file:
-        reader = csv.DictReader(file)
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8-sig", newline="") as file:
+            reader = csv.DictReader(file)
 
-        for row in reader:
-            entry = {
-                "date": row["date"],
-                "mood": row["mood"],
-                "water": int(row["water"]),
-                "exercise": int(row["exercise"]),
-                "sleep": int(row["sleep"])
-            }
+            if reader.fieldnames is None:
+                print("Error: The data file has no column headings.")
+                return None
 
-            entries.append(entry)
+            missing_fields = []
+            for field in FIELDNAMES:
+                if field not in reader.fieldnames:
+                    missing_fields.append(field)
+
+            if missing_fields:
+                print("Error: Missing CSV columns: " + ", ".join(missing_fields))
+                return None
+
+            for line_number, row in enumerate(reader, start=2):
+                try:
+                    entries.append(row_to_entry(row))
+                except (KeyError, TypeError, ValueError) as error:
+                    skipped_rows += 1
+                    print(f"Warning: Line {line_number} was skipped ({error}).")
+
+    except FileNotFoundError:
+        print("Error: The data file was not found.")
+        return None
+    except PermissionError:
+        print("Error: Permission was denied while reading the data file.")
+        return None
+    except (OSError, csv.Error) as error:
+        print(f"Error: The data file could not be read ({error}).")
+        return None
+
+    if skipped_rows > 0:
+        print(f"Skipped invalid rows: {skipped_rows}")
 
     return entries
 
 
+def save_entry(entry):
+    """Append one wellness entry to the CSV file safely."""
+    if not create_file_if_not_exists():
+        return False
+
+    try:
+        with open(DATA_FILE, "a", encoding="utf-8", newline="") as file:
+            writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
+            writer.writerow(entry)
+        return True
+    except PermissionError:
+        print("Error: Permission was denied while saving the entry.")
+    except (OSError, csv.Error) as error:
+        print(f"Error: The entry could not be saved ({error}).")
+
+    return False
+
+
+def linear_search_by_date(entries, target_date):
+    """Return entries matching a date using a linear search algorithm."""
+    matching_entries = []
+
+    for entry in entries:
+        if entry["date"] == target_date:
+            matching_entries.append(entry)
+
+    return matching_entries
+
+
 def add_entry():
+    """Collect, validate and save one daily wellness entry."""
     print("\nAdd Daily Entry")
 
-    date = get_valid_date()
-    mood = get_non_empty_text("Enter your mood today: ")
+    entries = load_entries()
+    if entries is None:
+        print("The entry cannot be added until the data file is corrected.")
+        pause()
+        return
 
-    water = get_number_input("How many glasses of water did you drink? ", 0, 30)
-    exercise = get_number_input("How many minutes did you exercise? ", 0, 300)
+    date_text = get_valid_date()
+
+    if linear_search_by_date(entries, date_text):
+        print("\nAn entry already exists for this date.")
+        print("The duplicate entry was not saved.")
+        pause()
+        return
+
+    mood = get_non_empty_text("Enter your mood today: ")
+    water = get_number_input(
+        "How many glasses of water did you drink? ", 0, 30
+    )
+    exercise = get_number_input(
+        "How many minutes did you exercise? ", 0, 300
+    )
     sleep = get_number_input("How many hours did you sleep? ", 0, 24)
 
     entry = {
-        "date": date,
+        "date": date_text,
         "mood": mood,
         "water": water,
         "exercise": exercise,
-        "sleep": sleep
+        "sleep": sleep,
     }
 
-    save_entry(entry)
+    if save_entry(entry):
+        print("\nEntry saved successfully!")
 
-    print("\nEntry saved successfully!")
     pause()
 
 
 def display_entry(entry):
+    """Display one wellness entry in a readable format."""
     print("----------------------------")
     print("Date:", entry["date"])
     print("Mood:", entry["mood"])
@@ -122,69 +232,166 @@ def display_entry(entry):
     print("Sleep:", entry["sleep"], "hours")
 
 
-def view_entries():
-    entries = load_entries()
-
+def display_entry_list(entries, title):
+    """Display a heading followed by a list of entries."""
     if len(entries) == 0:
         print("\nNo entries found.")
-    else:
-        print("\nAll Wellness Entries")
-        for entry in entries:
-            display_entry(entry)
+        return
+
+    print(f"\n{title}")
+    for entry in entries:
+        display_entry(entry)
+
+    print("----------------------------")
+    print("Total entries:", len(entries))
+
+
+def view_entries():
+    """Display every valid saved entry."""
+    entries = load_entries()
+
+    if entries is not None:
+        display_entry_list(entries, "All Wellness Entries")
 
     pause()
 
 
 def search_entry_by_date():
+    """Ask for a date and search entries one by one."""
     entries = load_entries()
 
+    if entries is None:
+        pause()
+        return
     if len(entries) == 0:
         print("\nNo entries found.")
         pause()
         return
 
-    search_date = get_valid_date()
-    found = False
-
-    for entry in entries:
-        if entry["date"] == search_date:
-            display_entry(entry)
-            found = True
-
-    if not found:
-        print("\nNo entry found for that date.")
-
+    search_date = get_valid_date("Enter the date to search (YYYY-MM-DD): ")
+    matching_entries = linear_search_by_date(entries, search_date)
+    display_entry_list(matching_entries, "Search Results")
     pause()
 
 
+def bubble_sort_by_water(entries, descending=False):
+    """Return a copy ordered by water intake using bubble sort."""
+    sorted_entries = entries.copy()
+
+    for end_position in range(len(sorted_entries) - 1, 0, -1):
+        swapped = False
+
+        for index in range(end_position):
+            left_water = sorted_entries[index]["water"]
+            right_water = sorted_entries[index + 1]["water"]
+
+            wrong_order = left_water > right_water
+            if descending:
+                wrong_order = left_water < right_water
+
+            if wrong_order:
+                sorted_entries[index], sorted_entries[index + 1] = (
+                    sorted_entries[index + 1],
+                    sorted_entries[index],
+                )
+                swapped = True
+
+        if not swapped:
+            break
+
+    return sorted_entries
+
+
+def get_sort_direction():
+    """Ask whether water values should be sorted up or down."""
+    while True:
+        print("\nSort order")
+        print("1. Lowest to highest")
+        print("2. Highest to lowest")
+        choice = input("Choose 1 or 2: ").strip()
+
+        if choice == "1":
+            return False
+        if choice == "2":
+            return True
+
+        print("Invalid choice. Please enter 1 or 2.")
+
+
 def sort_entries_by_water():
+    """Load and display entries ordered by water intake."""
     entries = load_entries()
 
+    if entries is None:
+        pause()
+        return
     if len(entries) == 0:
         print("\nNo entries found.")
         pause()
         return
 
-    sorted_entries = sorted(entries, key=lambda entry: entry["water"])
+    descending = get_sort_direction()
+    sorted_entries = bubble_sort_by_water(entries, descending)
+    display_entry_list(sorted_entries, "Entries Sorted by Water Intake")
+    pause()
 
-    print("\nEntries Sorted by Water Intake")
-    for entry in sorted_entries:
-        display_entry(entry)
 
+def filter_entries_by_date_range(entries, start_date, end_date):
+    """Return entries with dates inside the selected range."""
+    matching_entries = []
+
+    for entry in entries:
+        if start_date <= entry["date"] <= end_date:
+            matching_entries.append(entry)
+
+    return matching_entries
+
+
+def show_entries_in_date_range():
+    """Ask for a date range and display all matching entries."""
+    entries = load_entries()
+
+    if entries is None:
+        pause()
+        return
+    if len(entries) == 0:
+        print("\nNo entries found.")
+        pause()
+        return
+
+    print("\nFilter Entries by Date Range")
+    start_date = get_valid_date("Start date (YYYY-MM-DD): ")
+
+    while True:
+        end_date = get_valid_date("End date (YYYY-MM-DD): ")
+        if end_date < start_date:
+            print("The end date cannot be before the start date.")
+        else:
+            break
+
+    matching_entries = filter_entries_by_date_range(
+        entries, start_date, end_date
+    )
+    display_entry_list(matching_entries, "Date Range Results")
     pause()
 
 
 def show_text_chart(entries):
+    """Display a simple water-intake bar chart."""
     print("\nWater Intake Chart")
 
     for entry in entries:
         bar = "#" * entry["water"]
-        print(entry["date"], "|", bar, entry["water"], "glasses")
+        print(f"{entry['date']} | {bar} {entry['water']} glasses")
 
 
 def show_summary():
+    """Display average wellness values and the water chart."""
     entries = load_entries()
 
+    if entries is None:
+        pause()
+        return
     if len(entries) == 0:
         print("\nNo entries found.")
         pause()
@@ -200,7 +407,6 @@ def show_summary():
         total_sleep += entry["sleep"]
 
     count = len(entries)
-
     average_water = total_water / count
     average_exercise = total_exercise / count
     average_sleep = total_sleep / count
@@ -212,26 +418,30 @@ def show_summary():
     print("Average sleep:", round(average_sleep, 2), "hours")
 
     show_text_chart(entries)
-
     pause()
 
 
 def show_menu():
+    """Display the main program menu."""
     print("\nDaily Wellness Tracker")
     print("1. Add daily entry")
     print("2. View all entries")
     print("3. Search entry by date")
     print("4. Sort entries by water intake")
-    print("5. Show summary")
-    print("6. Exit")
+    print("5. Filter entries by date range")
+    print("6. Show summary")
+    print("7. Exit")
 
 
 def main():
-    create_file_if_not_exists()
+    """Create the data file and run the menu until Exit is selected."""
+    if not create_file_if_not_exists():
+        print("The program cannot start without a data file.")
+        return
 
     while True:
         show_menu()
-        choice = input("Choose an option: ")
+        choice = input("Choose an option (1-7): ").strip()
 
         if choice == "1":
             add_entry()
@@ -242,12 +452,18 @@ def main():
         elif choice == "4":
             sort_entries_by_water()
         elif choice == "5":
-            show_summary()
+            show_entries_in_date_range()
         elif choice == "6":
+            show_summary()
+        elif choice == "7":
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please enter a number from 1 to 6.")
+            print("Invalid choice. Please enter a number from 1 to 7.")
 
 
-main()
+if __name__ == "__main__":
+    try:
+        main()
+    except (KeyboardInterrupt, EOFError):
+        print("\nProgram closed safely.")

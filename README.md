@@ -10,63 +10,142 @@
 
 ## Project Description
 
-Daily Wellness Tracker is a Python program that helps users record and review their daily health and wellness habits. The user can add a daily entry with the date, mood, water intake, exercise minutes, and sleep hours.
+Daily Wellness Tracker is a menu-based Python program for recording and
+reviewing daily wellness habits. Each entry contains a date, mood, water
+intake, exercise time and sleep duration. The program keeps the information in
+a CSV file so that saved records remain available after the program closes.
 
-The program saves the data into a CSV file so that the information is not lost when the program closes. The user can also view all saved entries, search for an entry by date, sort entries by water intake, and see a summary with averages.
-
-This project uses functions, lists, dictionaries, file input/output, searching, sorting, loops, selection statements, and error checking.
+The user can view all entries, find a record by date, sort records by water
+intake, filter records between two dates and display a summary with averages
+and a text-based chart.
 
 ## Questions My Project Answers
 
-1. How much water did I drink today?
-2. Did I exercise today?
+1. How much water did I drink each day?
+2. How much exercise did I complete?
 3. How many hours did I sleep?
-4. What is my daily wellness summary?
+4. What was my mood on a selected date?
+5. What patterns appear in my wellness summary?
 
-## Features
+## Main Features
 
-- Add a daily wellness entry
-- Save entries to a CSV file
-- View all saved entries
-- Search entries by date
-- Sort entries by water intake
-- Show a wellness summary
-- Display a simple text-based water intake chart
-- Validate dates and number inputs
+- Add one validated daily wellness entry
+- Prevent duplicate entries for the same date
+- Save and load records using `wellness_data.csv`
+- View every valid saved entry
+- Search for an entry by date
+- Sort entries by water intake in either direction
+- Filter entries using a start date and an end date
+- Calculate average water, exercise and sleep values
+- Display a text-based water intake chart
+- Pause after each result so the output can be read
+- Close safely if the user presses Ctrl+C or sends an end-of-file signal
+
+## Programming Techniques
+
+The project demonstrates the following programming techniques:
+
+- Functions to divide the program into clear tasks
+- Lists to hold multiple wellness records
+- Dictionaries to represent individual records
+- `if`, `elif` and `else` selection statements
+- `while` and `for` loops
+- CSV file input and output
+- Input validation and exception handling
+- A linear search algorithm
+- A manually implemented bubble sort algorithm
+- Calculations and a simple text-based data visualisation
+
+## Searching and Sorting Algorithms
+
+### Linear Search
+
+The date search checks each entry in order until all matching dates have been
+found. This is a linear search with a worst-case time complexity of O(n).
+
+### Bubble Sort
+
+The water-intake sorting feature compares neighbouring entries and swaps them
+when they are in the wrong order. The algorithm repeats until no swaps are
+needed. It can sort from lowest to highest or highest to lowest and has a
+worst-case time complexity of O(n²).
+
+## Error Handling and Validation
+
+The program checks for:
+
+- Empty mood input and mood text longer than 40 characters
+- Invalid calendar dates and incorrect date formats
+- Non-numeric input where a whole number is required
+- Water values outside 0–30 glasses
+- Exercise values outside 0–300 minutes
+- Sleep values outside 0–24 hours
+- Duplicate dates
+- Missing CSV headings
+- Missing or damaged values in CSV rows
+- Missing files, permission problems and other file errors
+- Invalid menu and sorting choices
+- An end date that occurs before the start date
+
+Invalid CSV rows are skipped with a warning so that other valid records can
+still be used. A structurally invalid CSV file is not overwritten automatically.
+
+## Data File
+
+The CSV file uses these column headings:
+
+```text
+date,mood,water,exercise,sleep
+```
+
+Example record:
+
+```text
+2026-07-16,good,12,50,8
+```
 
 ## Libraries Used
 
-This program uses standard Python libraries only:
+The program uses only Python standard-library modules:
 
-- csv
-- os
-- datetime
+- `csv` for reading and writing CSV data
+- `os` for creating a reliable path to the data file
+- `datetime` for validating real calendar dates
 
 No external packages are required.
 
-## Installation Instructions
+## Installation
 
 1. Download or clone this repository.
-2. Make sure Python 3 is installed on your computer.
-3. Open the project folder in VS Code or another code editor.
+2. Make sure Python 3 is installed.
+3. Keep `main.py` and `wellness_data.csv` in the same project folder.
+4. Open the project folder in a terminal or code editor.
 
-## How to Run the Program
+## Running the Program
 
-Open a terminal in the project folder and run:
+On macOS or Linux, run:
 
 ```bash
 python3 main.py
 ```
 
-If you are using Windows, you may need to run:
+On Windows, run:
 
 ```bash
 python main.py
 ```
 
-## GitHub Repository
+## Menu Guide
 
-Repository link:
+1. **Add daily entry** – enter and save a new record.
+2. **View all entries** – display every valid record.
+3. **Search entry by date** – perform a linear date search.
+4. **Sort entries by water intake** – run bubble sort in either direction.
+5. **Filter entries by date range** – display records between two dates.
+6. **Show summary** – display averages and the water chart.
+7. **Exit** – close the program.
+
+## GitHub Repository
 
 https://github.com/E26180/daily-wellness-tracker
 
@@ -74,4 +153,5 @@ https://github.com/E26180/daily-wellness-tracker
 
 I confirm that this assignment is my own work.
 
-Where I have referred to online sources, I have provided comments detailing the reference and included a link to the source.
+Where I have referred to online sources, I have provided comments detailing
+the reference and included a link to the source.

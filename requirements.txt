@@ -1,1 +1,1 @@
-# No external packages required.
+# No external packages are required; the project uses Python's standard library.
