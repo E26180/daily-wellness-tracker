@@ -1,0 +1,13 @@
+WATER INTAKE CHART
+Each # symbol represents one glass of water.
+
+2026-06-01 | ######## 8 glasses
+2026-06-03 | ##### 5 glasses
+2026-06-05 | ########## 10 glasses
+2026-06-07 | #### 4 glasses
+2026-06-09 | ############ 12 glasses
+2026-06-11 | ####### 7 glasses
+2026-06-13 | ###### 6 glasses
+2026-06-15 | ######### 9 glasses
+2026-06-17 | ########### 11 glasses
+2026-06-19 | ### 3 glasses

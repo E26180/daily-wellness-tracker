@@ -7,6 +7,7 @@ from datetime import datetime
 
 PROJECT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(PROJECT_FOLDER, "wellness_data.csv")
+CHART_FILE = os.path.join(PROJECT_FOLDER, "water_intake_chart.txt")
 FIELDNAMES = ["date", "mood", "water", "exercise", "sleep"]
 
 
@@ -34,13 +35,17 @@ def create_file_if_not_exists():
 
 
 def get_valid_date(message="Enter date (YYYY-MM-DD): "):
-    """Ask for a real date in YYYY-MM-DD format."""
+    """Ask for a real, non-future date in YYYY-MM-DD format."""
     while True:
         date_text = input(message).strip()
 
         try:
-            datetime.strptime(date_text, "%Y-%m-%d")
-            return date_text
+            entered_date = datetime.strptime(date_text, "%Y-%m-%d").date()
+
+            if entered_date > datetime.today().date():
+                print("Future dates are not allowed.")
+            else:
+                return date_text
         except ValueError:
             print("Invalid date. Please enter a real date in YYYY-MM-DD format.")
 
@@ -82,7 +87,7 @@ def row_to_entry(row):
     exercise = int(row["exercise"])
     sleep = int(row["sleep"])
 
-    datetime.strptime(date_text, "%Y-%m-%d")
+    entry_date = datetime.strptime(date_text, "%Y-%m-%d").date()
 
     if mood == "":
         raise ValueError("mood is empty")
@@ -94,6 +99,8 @@ def row_to_entry(row):
         raise ValueError("exercise must be between 0 and 300")
     if sleep < 0 or sleep > 24:
         raise ValueError("sleep must be between 0 and 24")
+    if entry_date > datetime.today().date():
+        raise ValueError("future dates are not allowed")
 
     return {
         "date": date_text,
@@ -376,13 +383,46 @@ def show_entries_in_date_range():
     pause()
 
 
-def show_text_chart(entries):
-    """Display a simple water-intake bar chart."""
-    print("\nWater Intake Chart")
+def build_text_chart(entries):
+    """Build the water-intake chart as a list of text lines."""
+    chart_lines = [
+        "WATER INTAKE CHART",
+        "Each # symbol represents one glass of water.",
+        "",
+    ]
 
     for entry in entries:
         bar = "#" * entry["water"]
-        print(f"{entry['date']} | {bar} {entry['water']} glasses")
+        chart_lines.append(
+            f"{entry['date']} | {bar} {entry['water']} glasses"
+        )
+
+    return chart_lines
+
+
+def save_text_chart(chart_lines):
+    """Save the generated water-intake chart to a text file."""
+    try:
+        with open(CHART_FILE, "w", encoding="utf-8") as file:
+            file.write("\n".join(chart_lines) + "\n")
+        return True
+    except PermissionError:
+        print("Error: Permission was denied while saving the chart.")
+    except OSError as error:
+        print(f"Error: The chart could not be saved ({error}).")
+
+    return False
+
+
+def show_text_chart(entries):
+    """Display and save a simple water-intake bar chart."""
+    chart_lines = build_text_chart(entries)
+
+    print()
+    print("\n".join(chart_lines))
+
+    if save_text_chart(chart_lines):
+        print("\nChart saved to: water_intake_chart.txt")
 
 
 def show_summary():

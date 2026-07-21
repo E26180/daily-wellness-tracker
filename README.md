@@ -2,7 +2,7 @@
 
 ## Student Information
 
-- **Name:** Ahmet Baykoz
+- **Name:** Ahmet Ege Baykoz
 - **Student Number:** 303068470
 - **P Number:** P509320
 - **Course Code:** IY499
@@ -16,8 +16,9 @@ intake, exercise time and sleep duration. The program keeps the information in
 a CSV file so that saved records remain available after the program closes.
 
 The user can view all entries, find a record by date, sort records by water
-intake, filter records between two dates and display a summary with averages
-and a text-based chart.
+intake, filter records between two dates and display a summary with averages.
+The water-intake chart is displayed on screen and saved to
+`water_intake_chart.txt`.
 
 ## Questions My Project Answers
 
@@ -31,13 +32,15 @@ and a text-based chart.
 
 - Add one validated daily wellness entry
 - Prevent duplicate entries for the same date
+- Reject dates in the future
 - Save and load records using `wellness_data.csv`
+- Include 10 varied demonstration records for meaningful analysis
 - View every valid saved entry
 - Search for an entry by date
 - Sort entries by water intake in either direction
 - Filter entries using a start date and an end date
 - Calculate average water, exercise and sleep values
-- Display a text-based water intake chart
+- Display and save a text-based water intake chart
 - Pause after each result so the output can be read
 - Close safely if the user presses Ctrl+C or sends an end-of-file signal
 
@@ -76,6 +79,7 @@ The program checks for:
 
 - Empty mood input and mood text longer than 40 characters
 - Invalid calendar dates and incorrect date formats
+- Dates later than the current day
 - Non-numeric input where a whole number is required
 - Water values outside 0–30 glasses
 - Exercise values outside 0–300 minutes
@@ -101,8 +105,18 @@ date,mood,water,exercise,sleep
 Example record:
 
 ```text
-2026-07-16,good,12,50,8
+2026-06-09,energetic,12,60,9
 ```
+
+The submitted dataset contains 10 fictional demonstration records with varied
+mood, water, exercise and sleep values. All dates are in the past. This makes
+the sorting, filtering, averages and chart features easy to demonstrate.
+
+## Chart Output
+
+When the user chooses **Show summary**, the program displays the water-intake
+chart and writes the same chart to `water_intake_chart.txt`. File permission
+and operating-system errors are handled without crashing the program.
 
 ## Libraries Used
 
@@ -142,8 +156,16 @@ python main.py
 3. **Search entry by date** – perform a linear date search.
 4. **Sort entries by water intake** – run bubble sort in either direction.
 5. **Filter entries by date range** – display records between two dates.
-6. **Show summary** – display averages and the water chart.
+6. **Show summary** – display averages and save the water chart.
 7. **Exit** – close the program.
+
+## Submission Files
+
+- `main.py` – the Python program
+- `README.txt` – plain-text project documentation required by the brief
+- `requirements.txt` – confirms that no external packages are needed
+- `wellness_data.csv` – 10 demonstration records
+- `water_intake_chart.txt` – example chart output
 
 ## GitHub Repository
 
